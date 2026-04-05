@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand colors */
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+
+  /* Surface colors (dark theme) */
+  --color-surface-0: #0a0a0f;
+  --color-surface-1: #12121a;
+  --color-surface-2: #1a1a25;
+  --color-surface-3: #222230;
+
+  /* Muted */
+  --color-muted: #71717a;
+
+  /* Font */
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+
+  /* Animation */
+  --animate-fade-in: fade-in 0.2s ease-out;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Light theme overrides */
+html.light {
+  --color-surface-0: #f8f9fa;
+  --color-surface-1: #ffffff;
+  --color-surface-2: #f0f1f3;
+  --color-surface-3: #e4e5e9;
+  --color-muted: #6b7280;
+}
+
+/* Base styles */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--color-surface-0);
+  font-family: var(--font-sans);
+}
+
+html.dark body {
+  color: #f4f4f5;
+}
+
+html.light body {
+  color: #18181b;
+}
+
+/* Light mode text overrides for zinc colors used throughout */
+html.light .text-zinc-100 {
+  color: #18181b;
+}
+html.light .text-zinc-200 {
+  color: #27272a;
+}
+html.light .text-zinc-300 {
+  color: #3f3f46;
+}
+html.light .text-zinc-400 {
+  color: #52525b;
+}
+html.light .text-zinc-500 {
+  color: #71717a;
+}
+
+/* Light mode background overrides */
+html.light .bg-zinc-800 {
+  background-color: #e4e4e7;
+}
+html.light .bg-zinc-700 {
+  background-color: #d4d4d8;
+}
+html.light .bg-zinc-700\/40 {
+  background-color: rgb(212 212 216 / 0.4);
+}
+html.light .bg-zinc-600\/20 {
+  background-color: rgb(161 161 170 / 0.15);
+}
+html.light .bg-zinc-500 {
+  background-color: #a1a1aa;
+}
+
+/* Light mode border overrides */
+html.light .border-zinc-800 {
+  border-color: #e4e4e7;
+}
+html.light .border-zinc-800\/60 {
+  border-color: rgb(228 228 231 / 0.6);
+}
+html.light .border-zinc-700 {
+  border-color: #d4d4d8;
+}
+
+/* Light mode nav and overlays */
+html.light .bg-surface-1\/95 {
+  background-color: rgb(255 255 255 / 0.95);
+}
+
+/* Light mode hover states */
+html.light .hover\:bg-surface-2:hover {
+  background-color: #f0f1f3;
+}
+html.light .hover\:bg-surface-3:hover {
+  background-color: #e4e5e9;
+}
+html.light .hover\:text-zinc-200:hover {
+  color: #27272a;
+}
+html.light .hover\:text-zinc-300:hover {
+  color: #3f3f46;
+}
+
+/* Light mode: filter panel overlay */
+html.light .bg-black\/50 {
+  background-color: rgb(0 0 0 / 0.2);
+}
+
+/* Scrollbar styling for filter chips */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}

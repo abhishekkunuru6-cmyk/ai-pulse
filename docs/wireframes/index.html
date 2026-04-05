@@ -1,0 +1,1038 @@
+@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Pulse — Wireframes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' },
+            surface: { 0: '#0a0a0f', 1: '#12121a', 2: '#1a1a25', 3: '#222230' },
+            muted: '#71717a',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .nav-item.active {
+      color: #3b82f6;
+    }
+
+    .nav-item.active svg {
+      stroke: #3b82f6;
+    }
+
+    .chip {
+      transition: all 0.15s ease;
+    }
+
+    .chip.selected {
+      background: #2563eb;
+      color: white;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .filter-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .filter-panel.open {
+      max-height: 600px;
+    }
+  </style>
+</head>
+
+<body class="bg-surface-0 text-zinc-100 min-h-screen max-w-md mx-auto relative">
+
+  <!-- ============================== -->
+  <!-- TOP NAVIGATION BAR             -->
+  <!-- ============================== -->
+  <header class="sticky top-0 z-50 bg-surface-1/95 backdrop-blur border-b border-zinc-800 px-4 py-3">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white font-bold text-sm">A
+        </div>
+        <h1 class="text-lg font-semibold tracking-tight">AI Pulse</h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="showScreen('search')" class="p-2 rounded-lg hover:bg-surface-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+        </button>
+        <button class="p-2 rounded-lg hover:bg-surface-2 relative">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+          <span
+            class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full text-[10px] flex items-center justify-center font-bold">3</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================== -->
+  <!-- SCREEN 1: FEED (HOME)          -->
+  <!-- ============================== -->
+  <div id="screen-feed" class="screen active pb-20">
+
+    <!-- Quick Stats Bar -->
+    <div class="px-4 py-3 flex gap-3 text-xs overflow-x-auto">
+      <div class="bg-surface-2 rounded-lg px-3 py-2 flex-shrink-0">
+        <span class="text-muted">Today</span>
+        <span class="ml-1 font-semibold text-brand-400">42 new</span>
+      </div>
+      <div class="bg-surface-2 rounded-lg px-3 py-2 flex-shrink-0">
+        <span class="text-muted">Unread</span>
+        <span class="ml-1 font-semibold text-zinc-200">128</span>
+      </div>
+      <div class="bg-surface-2 rounded-lg px-3 py-2 flex-shrink-0">
+        <span class="text-muted">Saved</span>
+        <span class="ml-1 font-semibold text-amber-400">7</span>
+      </div>
+      <div class="bg-surface-2 rounded-lg px-3 py-2 flex-shrink-0">
+        <span class="text-muted">Sources</span>
+        <span class="ml-1 font-semibold text-zinc-200">67</span>
+      </div>
+    </div>
+
+    <!-- Filter Chips Row -->
+    <div class="px-4 pb-2 flex gap-2 overflow-x-auto">
+      <button onclick="toggleFilterPanel()"
+        class="chip bg-surface-2 text-zinc-300 text-xs px-3 py-1.5 rounded-full flex items-center gap-1 flex-shrink-0">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
+        </svg>
+        Filters
+      </button>
+      <button class="chip selected text-xs px-3 py-1.5 rounded-full flex-shrink-0">All</button>
+      <button onclick="this.classList.toggle('selected')"
+        class="chip bg-surface-2 text-zinc-400 text-xs px-3 py-1.5 rounded-full flex-shrink-0">Papers</button>
+      <button onclick="this.classList.toggle('selected')"
+        class="chip bg-surface-2 text-zinc-400 text-xs px-3 py-1.5 rounded-full flex-shrink-0">News</button>
+      <button onclick="this.classList.toggle('selected')"
+        class="chip bg-surface-2 text-zinc-400 text-xs px-3 py-1.5 rounded-full flex-shrink-0">Code</button>
+      <button onclick="this.classList.toggle('selected')"
+        class="chip bg-surface-2 text-zinc-400 text-xs px-3 py-1.5 rounded-full flex-shrink-0">Social</button>
+      <button onclick="this.classList.toggle('selected')"
+        class="chip bg-surface-2 text-zinc-400 text-xs px-3 py-1.5 rounded-full flex-shrink-0">LLMs</button>
+      <button onclick="this.classList.toggle('selected')"
+        class="chip bg-surface-2 text-zinc-400 text-xs px-3 py-1.5 rounded-full flex-shrink-0">Agents</button>
+    </div>
+
+    <!-- Expandable Filter Panel -->
+    <div id="filter-panel" class="filter-panel mx-4 bg-surface-2 rounded-xl">
+      <div class="p-4 space-y-4">
+        <div>
+          <h3 class="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Time Range</h3>
+          <div class="flex gap-2 flex-wrap">
+            <button class="chip selected text-xs px-3 py-1.5 rounded-full">Today</button>
+            <button class="chip bg-surface-3 text-zinc-400 text-xs px-3 py-1.5 rounded-full">This Week</button>
+            <button class="chip bg-surface-3 text-zinc-400 text-xs px-3 py-1.5 rounded-full">This Month</button>
+            <button class="chip bg-surface-3 text-zinc-400 text-xs px-3 py-1.5 rounded-full">All Time</button>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Platform</h3>
+          <div class="flex gap-2 flex-wrap">
+            <button class="chip bg-surface-3 text-zinc-400 text-xs px-3 py-1.5 rounded-full">ArXiv</button>
+            <button class="chip bg-surface-3 text-zinc-400 text-xs px-3 py-1.5 rounded-full">Reddit</button>
+            <button class="chip bg-surface-3 text-zinc-400 text-xs px-3 py-1.5 rounded-full">HN</button>
+            <button class="chip bg-surface-3 text-zinc-400 text-xs px-3 py-1.5 rounded-full">GitHub</button>
+            <button class="chip bg-surface-3 text-zinc-400 text-xs px-3 py-1.5 rounded-full">Blogs</button>
+            <button class="chip bg-surface-3 text-zinc-400 text-xs px-3 py-1.5 rounded-full">YouTube</button>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Engagement</h3>
+          <div class="flex gap-2 flex-wrap">
+            <button class="chip bg-surface-3 text-zinc-400 text-xs px-3 py-1.5 rounded-full">Trending</button>
+            <button class="chip bg-surface-3 text-zinc-400 text-xs px-3 py-1.5 rounded-full">Under the Radar</button>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button class="chip bg-surface-3 text-zinc-400 text-xs px-3 py-1.5 rounded-full flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+            </svg>
+            Save Preset
+          </button>
+          <button class="text-xs text-red-400 px-3 py-1.5">Clear All</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preset Chips -->
+    <div class="px-4 py-2 flex gap-2 overflow-x-auto">
+      <span class="text-[10px] text-muted uppercase tracking-wider self-center mr-1">Presets:</span>
+      <button
+        class="bg-brand-600/20 text-brand-400 text-xs px-3 py-1 rounded-full border border-brand-600/30 flex-shrink-0">Morning
+        Catch-up</button>
+      <button class="bg-surface-2 text-zinc-400 text-xs px-3 py-1 rounded-full flex-shrink-0">Deep Research</button>
+      <button class="bg-surface-2 text-zinc-400 text-xs px-3 py-1 rounded-full flex-shrink-0">Code Watch</button>
+    </div>
+
+    <!-- Article Cards -->
+    <div class="px-4 space-y-3 mt-1">
+
+      <!-- Article Card 1 — Trending -->
+      <article class="bg-surface-1 rounded-xl border border-zinc-800/60 p-4 fade-in"
+        onclick="showScreen('article-detail')">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span
+                class="text-[10px] font-semibold uppercase tracking-wider text-orange-400 bg-orange-400/10 px-2 py-0.5 rounded-full">Trending</span>
+              <span class="text-[10px] text-muted">2h ago</span>
+            </div>
+            <h3 class="text-sm font-medium leading-snug text-zinc-100 mb-1.5">Claude 4.5 Achieves State-of-the-Art on
+              SWE-bench with 72% Pass Rate</h3>
+            <p class="text-xs text-muted leading-relaxed line-clamp-2">Anthropic's latest model shows significant
+              improvements in autonomous coding tasks, surpassing previous benchmarks by 15 percentage points...</p>
+            <div class="flex items-center gap-3 mt-2.5">
+              <span class="text-[10px] text-muted flex items-center gap-1">
+                <span
+                  class="w-4 h-4 rounded bg-orange-600/20 text-orange-400 flex items-center justify-center text-[8px] font-bold">HN</span>
+                Hacker News
+              </span>
+              <span class="text-[10px] text-muted">842 pts</span>
+              <span class="text-[10px] text-muted">347 comments</span>
+              <span class="inline-flex items-center gap-0.5 text-[10px] text-brand-400">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path
+                    d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                4.8
+              </span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1.5 items-center flex-shrink-0">
+            <button onclick="event.stopPropagation()"
+              class="p-1.5 rounded-lg hover:bg-surface-2 text-zinc-500 hover:text-green-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z" />
+              </svg>
+            </button>
+            <button onclick="event.stopPropagation()"
+              class="p-1.5 rounded-lg hover:bg-surface-2 text-zinc-500 hover:text-red-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z" />
+              </svg>
+            </button>
+            <button onclick="event.stopPropagation()"
+              class="p-1.5 rounded-lg hover:bg-surface-2 text-zinc-500 hover:text-amber-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Article Card 2 — Paper -->
+      <article class="bg-surface-1 rounded-xl border border-zinc-800/60 p-4 fade-in">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span
+                class="text-[10px] font-semibold uppercase tracking-wider text-purple-400 bg-purple-400/10 px-2 py-0.5 rounded-full">Paper</span>
+              <span class="text-[10px] text-muted">5h ago</span>
+            </div>
+            <h3 class="text-sm font-medium leading-snug text-zinc-100 mb-1.5">Attention Is All You Need... Again:
+              Revisiting Transformer Efficiency at Scale</h3>
+            <p class="text-xs text-muted leading-relaxed line-clamp-2">A comprehensive analysis of attention mechanisms
+              at 100B+ parameter scale revealing surprising efficiency patterns in sparse attention...</p>
+            <div class="flex items-center gap-3 mt-2.5">
+              <span class="text-[10px] text-muted flex items-center gap-1">
+                <span
+                  class="w-4 h-4 rounded bg-red-600/20 text-red-400 flex items-center justify-center text-[8px] font-bold">Ax</span>
+                ArXiv
+              </span>
+              <span class="text-[10px] text-muted">cs.CL</span>
+              <span class="inline-flex items-center gap-0.5 text-[10px] text-brand-400">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path
+                    d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                4.5
+              </span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1.5 items-center flex-shrink-0">
+            <button class="p-1.5 rounded-lg hover:bg-surface-2 text-zinc-500 hover:text-green-400"><svg class="w-4 h-4"
+                fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z" />
+              </svg></button>
+            <button class="p-1.5 rounded-lg hover:bg-surface-2 text-zinc-500 hover:text-red-400"><svg class="w-4 h-4"
+                fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z" />
+              </svg></button>
+            <button class="p-1.5 rounded-lg hover:bg-surface-2 text-zinc-500 hover:text-amber-400"><svg class="w-4 h-4"
+                fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+              </svg></button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Article Card 3 — Code -->
+      <article class="bg-surface-1 rounded-xl border border-zinc-800/60 p-4 fade-in">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span
+                class="text-[10px] font-semibold uppercase tracking-wider text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full">Code</span>
+              <span class="text-[10px] text-muted">8h ago</span>
+            </div>
+            <h3 class="text-sm font-medium leading-snug text-zinc-100 mb-1.5">vLLM v0.8.0 — 2x Faster Inference with
+              Speculative Decoding</h3>
+            <p class="text-xs text-muted leading-relaxed line-clamp-2">Major release adds speculative decoding support,
+              reduces TTFT by 50%, new chunked prefill for long contexts...</p>
+            <div class="flex items-center gap-3 mt-2.5">
+              <span class="text-[10px] text-muted flex items-center gap-1">
+                <span
+                  class="w-4 h-4 rounded bg-zinc-600/30 text-zinc-300 flex items-center justify-center text-[8px] font-bold">GH</span>
+                GitHub
+              </span>
+              <span class="text-[10px] text-muted">2.4k stars</span>
+              <span class="inline-flex items-center gap-0.5 text-[10px] text-brand-400">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path
+                    d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                5.0
+              </span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1.5 items-center flex-shrink-0">
+            <button class="p-1.5 rounded-lg hover:bg-surface-2 text-green-400"><svg class="w-4 h-4" fill="currentColor"
+                stroke="currentColor" stroke-width="0" viewBox="0 0 24 24">
+                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z" />
+              </svg></button>
+            <button class="p-1.5 rounded-lg hover:bg-surface-2 text-zinc-500 hover:text-red-400"><svg class="w-4 h-4"
+                fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z" />
+              </svg></button>
+            <button class="p-1.5 rounded-lg hover:bg-surface-2 text-amber-400"><svg class="w-4 h-4" fill="currentColor"
+                stroke="currentColor" stroke-width="0" viewBox="0 0 24 24">
+                <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+              </svg></button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Article Card 4 — Social/Read state -->
+      <article class="bg-surface-1 rounded-xl border border-zinc-800/60 p-4 fade-in opacity-60">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span
+                class="text-[10px] font-semibold uppercase tracking-wider text-sky-400 bg-sky-400/10 px-2 py-0.5 rounded-full">Social</span>
+              <span class="text-[10px] text-zinc-500">12h ago</span>
+              <span class="text-[10px] text-zinc-600 flex items-center gap-0.5">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                Read
+              </span>
+            </div>
+            <h3 class="text-sm font-medium leading-snug text-zinc-400 mb-1.5">Karpathy: "The hottest programming
+              language is English"</h3>
+            <div class="flex items-center gap-3 mt-2">
+              <span class="text-[10px] text-muted flex items-center gap-1">
+                <span
+                  class="w-4 h-4 rounded bg-orange-600/20 text-orange-400 flex items-center justify-center text-[8px] font-bold">R</span>
+                r/MachineLearning
+              </span>
+              <span class="text-[10px] text-muted">1.2k upvotes</span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1.5 items-center flex-shrink-0">
+            <button class="p-1.5 rounded-lg text-zinc-600"><svg class="w-4 h-4" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
+                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z" />
+              </svg></button>
+            <button class="p-1.5 rounded-lg text-zinc-600"><svg class="w-4 h-4" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
+                <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z" />
+              </svg></button>
+            <button class="p-1.5 rounded-lg text-zinc-600"><svg class="w-4 h-4" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
+                <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+              </svg></button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Article Card 5 — Newsletter -->
+      <article class="bg-surface-1 rounded-xl border border-zinc-800/60 p-4 fade-in">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span
+                class="text-[10px] font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-400/10 px-2 py-0.5 rounded-full">Newsletter</span>
+              <span class="text-[10px] text-muted">1d ago</span>
+            </div>
+            <h3 class="text-sm font-medium leading-snug text-zinc-100 mb-1.5">The Batch: Week in Review — Foundation
+              Model Price Wars Heat Up</h3>
+            <p class="text-xs text-muted leading-relaxed line-clamp-2">Andrew Ng's weekly roundup covers the competitive
+              pricing landscape as Anthropic, OpenAI, and Google slash API costs...</p>
+            <div class="flex items-center gap-3 mt-2.5">
+              <span class="text-[10px] text-muted flex items-center gap-1">
+                <span
+                  class="w-4 h-4 rounded bg-blue-600/20 text-blue-400 flex items-center justify-center text-[8px] font-bold">B</span>
+                The Batch
+              </span>
+              <span class="inline-flex items-center gap-0.5 text-[10px] text-brand-400">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path
+                    d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                4.9
+              </span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1.5 items-center flex-shrink-0">
+            <button class="p-1.5 rounded-lg hover:bg-surface-2 text-zinc-500"><svg class="w-4 h-4" fill="none"
+                stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z" />
+              </svg></button>
+            <button class="p-1.5 rounded-lg hover:bg-surface-2 text-zinc-500"><svg class="w-4 h-4" fill="none"
+                stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z" />
+              </svg></button>
+            <button class="p-1.5 rounded-lg hover:bg-surface-2 text-zinc-500"><svg class="w-4 h-4" fill="none"
+                stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+              </svg></button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+
+  <!-- ============================== -->
+  <!-- SCREEN 2: DIGEST               -->
+  <!-- ============================== -->
+  <div id="screen-digest" class="screen pb-20">
+    <div class="px-4 py-4">
+      <h2 class="text-xl font-bold mb-1">Daily Digest</h2>
+      <p class="text-xs text-muted mb-4">Top 10 articles you should read today</p>
+
+      <div class="flex gap-2 mb-4">
+        <button class="chip selected text-xs px-4 py-1.5 rounded-full">Today</button>
+        <button class="chip bg-surface-2 text-zinc-400 text-xs px-4 py-1.5 rounded-full">This Week</button>
+      </div>
+
+      <div class="space-y-2">
+        <div class="flex items-start gap-3 bg-surface-1 rounded-xl p-3 border border-zinc-800/60">
+          <span class="text-lg font-bold text-brand-500 w-6 flex-shrink-0">1</span>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-sm font-medium text-zinc-100 leading-snug">Claude 4.5 Achieves State-of-the-Art on SWE-bench
+            </h3>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[10px] text-orange-400">HN</span>
+              <span class="text-[10px] text-muted">842 pts</span>
+              <span class="text-[10px] text-muted">2h ago</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-muted flex-shrink-0 mt-1" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+            <polyline points="15 3 21 3 21 9" />
+            <line x1="10" y1="14" x2="21" y2="3" />
+          </svg>
+        </div>
+
+        <div class="flex items-start gap-3 bg-surface-1 rounded-xl p-3 border border-zinc-800/60">
+          <span class="text-lg font-bold text-brand-500 w-6 flex-shrink-0">2</span>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-sm font-medium text-zinc-100 leading-snug">Attention Is All You Need... Again</h3>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[10px] text-red-400">ArXiv</span>
+              <span class="text-[10px] text-muted">cs.CL</span>
+              <span class="text-[10px] text-muted">5h ago</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-muted flex-shrink-0 mt-1" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+            <polyline points="15 3 21 3 21 9" />
+            <line x1="10" y1="14" x2="21" y2="3" />
+          </svg>
+        </div>
+
+        <div class="flex items-start gap-3 bg-surface-1 rounded-xl p-3 border border-zinc-800/60">
+          <span class="text-lg font-bold text-brand-500 w-6 flex-shrink-0">3</span>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-sm font-medium text-zinc-100 leading-snug">vLLM v0.8.0 — 2x Faster Inference</h3>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[10px] text-zinc-300">GitHub</span>
+              <span class="text-[10px] text-muted">2.4k stars</span>
+              <span class="text-[10px] text-muted">8h ago</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-muted flex-shrink-0 mt-1" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+            <polyline points="15 3 21 3 21 9" />
+            <line x1="10" y1="14" x2="21" y2="3" />
+          </svg>
+        </div>
+
+        <div class="flex items-start gap-3 bg-surface-1 rounded-xl p-3 border border-zinc-800/60">
+          <span class="text-lg font-bold text-zinc-500 w-6 flex-shrink-0">4</span>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-sm font-medium text-zinc-100 leading-snug">Google DeepMind's Gemini 2.5 Flash Benchmarks
+            </h3>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[10px] text-blue-400">Blog</span>
+              <span class="text-[10px] text-muted">6h ago</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-muted flex-shrink-0 mt-1" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+            <polyline points="15 3 21 3 21 9" />
+            <line x1="10" y1="14" x2="21" y2="3" />
+          </svg>
+        </div>
+
+        <div class="flex items-start gap-3 bg-surface-1 rounded-xl p-3 border border-zinc-800/60">
+          <span class="text-lg font-bold text-zinc-500 w-6 flex-shrink-0">5</span>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-sm font-medium text-zinc-100 leading-snug">Llama 4 Scout and Maverick Released</h3>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[10px] text-orange-400">HN</span>
+              <span class="text-[10px] text-muted">621 pts</span>
+              <span class="text-[10px] text-muted">10h ago</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-muted flex-shrink-0 mt-1" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+            <polyline points="15 3 21 3 21 9" />
+            <line x1="10" y1="14" x2="21" y2="3" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== -->
+  <!-- SCREEN 3: SOURCES              -->
+  <!-- ============================== -->
+  <div id="screen-sources" class="screen pb-20">
+    <div class="px-4 py-4">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold">Sources</h2>
+        <button class="bg-brand-600 text-white text-xs font-medium px-3 py-1.5 rounded-lg flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          Add Source
+        </button>
+      </div>
+
+      <!-- Source Filters -->
+      <div class="flex gap-2 mb-3 overflow-x-auto">
+        <button class="chip selected text-xs px-3 py-1.5 rounded-full">All (67)</button>
+        <button class="chip bg-surface-2 text-zinc-400 text-xs px-3 py-1.5 rounded-full flex-shrink-0">Active
+          (60)</button>
+        <button class="chip bg-surface-2 text-zinc-400 text-xs px-3 py-1.5 rounded-full flex-shrink-0">Paused
+          (5)</button>
+        <button class="chip bg-surface-2 text-zinc-400 text-xs px-3 py-1.5 rounded-full flex-shrink-0">Stale
+          (2)</button>
+      </div>
+
+      <div class="flex gap-2 mb-4 overflow-x-auto">
+        <button class="chip bg-surface-2 text-zinc-400 text-xs px-3 py-1.5 rounded-full flex-shrink-0">Research</button>
+        <button class="chip bg-surface-2 text-zinc-400 text-xs px-3 py-1.5 rounded-full flex-shrink-0">Social</button>
+        <button class="chip bg-surface-2 text-zinc-400 text-xs px-3 py-1.5 rounded-full flex-shrink-0">Code</button>
+        <button class="chip bg-surface-2 text-zinc-400 text-xs px-3 py-1.5 rounded-full flex-shrink-0">News</button>
+        <button class="chip bg-surface-2 text-zinc-400 text-xs px-3 py-1.5 rounded-full flex-shrink-0">Company</button>
+      </div>
+
+      <!-- Source List -->
+      <div class="space-y-2">
+
+        <div class="bg-surface-1 rounded-xl border border-zinc-800/60 p-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <div
+                class="w-8 h-8 rounded-lg bg-orange-600/20 flex items-center justify-center text-orange-400 text-xs font-bold flex-shrink-0">
+                HN</div>
+              <div class="min-w-0">
+                <h3 class="text-sm font-medium text-zinc-100 truncate">Hacker News</h3>
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] text-muted">Social</span>
+                  <span class="text-[10px] text-muted">Every 4h</span>
+                  <span class="text-[10px] text-green-400">Active</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="flex gap-0.5">
+                <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                <svg class="w-3.5 h-3.5 text-zinc-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+              </div>
+              <button class="p-1 text-muted"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                  viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="12" cy="5" r="1" />
+                  <circle cx="12" cy="19" r="1" />
+                </svg></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-surface-1 rounded-xl border border-zinc-800/60 p-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <div
+                class="w-8 h-8 rounded-lg bg-red-600/20 flex items-center justify-center text-red-400 text-xs font-bold flex-shrink-0">
+                Ax</div>
+              <div class="min-w-0">
+                <h3 class="text-sm font-medium text-zinc-100 truncate">ArXiv — cs.AI</h3>
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] text-muted">Research</span>
+                  <span class="text-[10px] text-muted">Daily</span>
+                  <span class="text-[10px] text-green-400">Active</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="flex gap-0.5">
+                <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+              </div>
+              <button class="p-1 text-muted"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                  viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="12" cy="5" r="1" />
+                  <circle cx="12" cy="19" r="1" />
+                </svg></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stale source warning -->
+        <div class="bg-surface-1 rounded-xl border border-amber-500/30 p-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <div
+                class="w-8 h-8 rounded-lg bg-amber-600/20 flex items-center justify-center text-amber-400 flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </div>
+              <div class="min-w-0">
+                <h3 class="text-sm font-medium text-zinc-100 truncate">Lil'Log (Lilian Weng)</h3>
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] text-muted">Blog</span>
+                  <span class="text-[10px] text-amber-400">Stale — 45 days</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-1">
+              <button class="text-[10px] text-zinc-400 bg-surface-2 px-2 py-1 rounded">Keep</button>
+              <button class="text-[10px] text-amber-400 bg-surface-2 px-2 py-1 rounded">Pause</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-surface-1 rounded-xl border border-zinc-800/60 p-3 opacity-50">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <div
+                class="w-8 h-8 rounded-lg bg-zinc-600/20 flex items-center justify-center text-zinc-400 text-xs font-bold flex-shrink-0">
+                YT</div>
+              <div class="min-w-0">
+                <h3 class="text-sm font-medium text-zinc-400 truncate">Two Minute Papers</h3>
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] text-muted">Podcast</span>
+                  <span class="text-[10px] text-zinc-500">Paused</span>
+                </div>
+              </div>
+            </div>
+            <button class="text-[10px] text-brand-400 bg-surface-2 px-2 py-1 rounded">Activate</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== -->
+  <!-- SCREEN 4: SEARCH               -->
+  <!-- ============================== -->
+  <div id="screen-search" class="screen pb-20">
+    <div class="px-4 py-4">
+      <div class="flex items-center gap-2 mb-4">
+        <button onclick="showScreen('feed')" class="p-2 -ml-2">
+          <svg class="w-5 h-5 text-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+        </button>
+        <div class="flex-1 relative">
+          <svg class="w-4 h-4 text-muted absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
+            stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <input type="text" placeholder="Search articles..." value="transformer efficiency"
+            class="w-full bg-surface-2 rounded-xl pl-10 pr-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 outline-none border border-zinc-700 focus:border-brand-500" />
+        </div>
+      </div>
+
+      <p class="text-xs text-muted mb-3">12 results for "transformer efficiency"</p>
+
+      <div class="space-y-2">
+        <div class="bg-surface-1 rounded-xl border border-zinc-800/60 p-3">
+          <div class="flex items-center gap-2 mb-1">
+            <span
+              class="text-[10px] text-purple-400 bg-purple-400/10 px-2 py-0.5 rounded-full font-semibold">Paper</span>
+            <span class="text-[10px] text-muted">5h ago</span>
+          </div>
+          <h3 class="text-sm font-medium text-zinc-100">Attention Is All You Need... Again: Revisiting <mark
+              class="bg-brand-600/30 text-brand-200 rounded px-0.5">Transformer Efficiency</mark> at Scale</h3>
+          <span class="text-[10px] text-muted mt-1 block">ArXiv • cs.CL</span>
+        </div>
+        <div class="bg-surface-1 rounded-xl border border-zinc-800/60 p-3">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-[10px] text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full font-semibold">Code</span>
+            <span class="text-[10px] text-muted">2d ago</span>
+          </div>
+          <h3 class="text-sm font-medium text-zinc-100">FlashAttention-3: Fast and <mark
+              class="bg-brand-600/30 text-brand-200 rounded px-0.5">Efficient</mark> <mark
+              class="bg-brand-600/30 text-brand-200 rounded px-0.5">Transformer</mark> Inference</h3>
+          <span class="text-[10px] text-muted mt-1 block">GitHub • 1.8k stars</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== -->
+  <!-- SCREEN 5: ARTICLE DETAIL       -->
+  <!-- ============================== -->
+  <div id="screen-article-detail" class="screen pb-20">
+    <div class="px-4 py-4">
+      <button onclick="showScreen('feed')" class="flex items-center gap-1 text-muted text-sm mb-4 -ml-1">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+        Back to feed
+      </button>
+
+      <div class="space-y-4">
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <span
+              class="text-[10px] font-semibold uppercase tracking-wider text-orange-400 bg-orange-400/10 px-2 py-0.5 rounded-full">Trending</span>
+            <span class="text-[10px] text-muted">2 hours ago</span>
+          </div>
+          <h1 class="text-lg font-bold leading-snug text-zinc-100">Claude 4.5 Achieves State-of-the-Art on SWE-bench
+            with 72% Pass Rate</h1>
+        </div>
+
+        <div class="bg-surface-2 rounded-xl p-3 space-y-2">
+          <div class="flex items-center gap-2">
+            <span
+              class="w-6 h-6 rounded bg-orange-600/20 text-orange-400 flex items-center justify-center text-[10px] font-bold">HN</span>
+            <span class="text-sm text-zinc-200">Hacker News</span>
+            <div class="flex gap-0.5 ml-auto">
+              <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+              <span class="text-xs text-amber-400">4.8</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-xs text-muted">
+            <span>842 points</span>
+            <span>347 comments</span>
+          </div>
+        </div>
+
+        <p class="text-sm text-zinc-300 leading-relaxed">Anthropic's latest model shows significant improvements in
+          autonomous coding tasks, surpassing previous benchmarks by 15 percentage points. The model demonstrates
+          improved long-context reasoning and tool use capabilities.</p>
+
+        <div>
+          <h3 class="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Why this was recommended</h3>
+          <p class="text-xs text-zinc-400">Trending on Hacker News (842 points) from a source you rated highly</p>
+        </div>
+
+        <div>
+          <h3 class="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Topics</h3>
+          <div class="flex gap-2 flex-wrap">
+            <span class="text-xs bg-surface-2 text-zinc-300 px-2 py-1 rounded-full">LLMs</span>
+            <span class="text-xs bg-surface-2 text-zinc-300 px-2 py-1 rounded-full">Agents</span>
+            <span class="text-xs bg-surface-2 text-zinc-300 px-2 py-1 rounded-full">Benchmarks</span>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex gap-2">
+          <a href="#"
+            class="flex-1 bg-brand-600 text-white text-sm font-medium py-3 rounded-xl flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+            Read Article
+          </a>
+          <button class="p-3 bg-surface-2 rounded-xl text-zinc-400 hover:text-green-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z" />
+            </svg>
+          </button>
+          <button class="p-3 bg-surface-2 rounded-xl text-zinc-400 hover:text-red-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z" />
+            </svg>
+          </button>
+          <button class="p-3 bg-surface-2 rounded-xl text-zinc-400 hover:text-amber-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== -->
+  <!-- SCREEN 6: STATS                -->
+  <!-- ============================== -->
+  <div id="screen-stats" class="screen pb-20">
+    <div class="px-4 py-4">
+      <h2 class="text-xl font-bold mb-4">Dashboard</h2>
+
+      <div class="grid grid-cols-2 gap-3 mb-6">
+        <div class="bg-surface-1 rounded-xl border border-zinc-800/60 p-3">
+          <p class="text-2xl font-bold text-zinc-100">1,247</p>
+          <p class="text-[10px] text-muted uppercase tracking-wider">Total Articles</p>
+        </div>
+        <div class="bg-surface-1 rounded-xl border border-zinc-800/60 p-3">
+          <p class="text-2xl font-bold text-zinc-100">67</p>
+          <p class="text-[10px] text-muted uppercase tracking-wider">Active Sources</p>
+        </div>
+        <div class="bg-surface-1 rounded-xl border border-zinc-800/60 p-3">
+          <p class="text-2xl font-bold text-brand-400">42</p>
+          <p class="text-[10px] text-muted uppercase tracking-wider">New Today</p>
+        </div>
+        <div class="bg-surface-1 rounded-xl border border-zinc-800/60 p-3">
+          <p class="text-2xl font-bold text-amber-400">7</p>
+          <p class="text-[10px] text-muted uppercase tracking-wider">Saved</p>
+        </div>
+      </div>
+
+      <h3 class="text-sm font-semibold text-zinc-300 mb-3">Sources by Category</h3>
+      <div class="space-y-2 mb-6">
+        <div class="flex items-center gap-3">
+          <span class="text-xs text-muted w-20">Research</span>
+          <div class="flex-1 h-2 bg-surface-2 rounded-full overflow-hidden">
+            <div class="h-full bg-purple-500 rounded-full" style="width:25%"></div>
+          </div>
+          <span class="text-xs text-zinc-400 w-6 text-right">15</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-xs text-muted w-20">News</span>
+          <div class="flex-1 h-2 bg-surface-2 rounded-full overflow-hidden">
+            <div class="h-full bg-blue-500 rounded-full" style="width:20%"></div>
+          </div>
+          <span class="text-xs text-zinc-400 w-6 text-right">12</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-xs text-muted w-20">Social</span>
+          <div class="flex-1 h-2 bg-surface-2 rounded-full overflow-hidden">
+            <div class="h-full bg-sky-500 rounded-full" style="width:15%"></div>
+          </div>
+          <span class="text-xs text-zinc-400 w-6 text-right">10</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-xs text-muted w-20">Code</span>
+          <div class="flex-1 h-2 bg-surface-2 rounded-full overflow-hidden">
+            <div class="h-full bg-green-500 rounded-full" style="width:18%"></div>
+          </div>
+          <span class="text-xs text-zinc-400 w-6 text-right">11</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-xs text-muted w-20">Company</span>
+          <div class="flex-1 h-2 bg-surface-2 rounded-full overflow-hidden">
+            <div class="h-full bg-orange-500 rounded-full" style="width:15%"></div>
+          </div>
+          <span class="text-xs text-zinc-400 w-6 text-right">9</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-xs text-muted w-20">Other</span>
+          <div class="flex-1 h-2 bg-surface-2 rounded-full overflow-hidden">
+            <div class="h-full bg-zinc-500 rounded-full" style="width:12%"></div>
+          </div>
+          <span class="text-xs text-zinc-400 w-6 text-right">10</span>
+        </div>
+      </div>
+
+      <h3 class="text-sm font-semibold text-zinc-300 mb-3">Content Types Today</h3>
+      <div class="flex gap-2 flex-wrap">
+        <div class="bg-purple-400/10 text-purple-400 text-xs px-3 py-1.5 rounded-full">Papers: 8</div>
+        <div class="bg-blue-400/10 text-blue-400 text-xs px-3 py-1.5 rounded-full">News: 12</div>
+        <div class="bg-green-400/10 text-green-400 text-xs px-3 py-1.5 rounded-full">Code: 6</div>
+        <div class="bg-sky-400/10 text-sky-400 text-xs px-3 py-1.5 rounded-full">Social: 9</div>
+        <div class="bg-indigo-400/10 text-indigo-400 text-xs px-3 py-1.5 rounded-full">Newsletter: 3</div>
+        <div class="bg-red-400/10 text-red-400 text-xs px-3 py-1.5 rounded-full">Video: 4</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== -->
+  <!-- BOTTOM NAVIGATION              -->
+  <!-- ============================== -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-surface-1/95 backdrop-blur border-t border-zinc-800 max-w-md mx-auto">
+    <div class="flex items-center justify-around py-2">
+      <button onclick="showScreen('feed')" class="nav-item active flex flex-col items-center gap-0.5 px-3 py-1"
+        data-screen="feed">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+        </svg>
+        <span class="text-[10px]">Feed</span>
+      </button>
+      <button onclick="showScreen('digest')" class="nav-item flex flex-col items-center gap-0.5 px-3 py-1 text-muted"
+        data-screen="digest">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+        </svg>
+        <span class="text-[10px]">Digest</span>
+      </button>
+      <button onclick="showScreen('sources')" class="nav-item flex flex-col items-center gap-0.5 px-3 py-1 text-muted"
+        data-screen="sources">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <ellipse cx="12" cy="5" rx="9" ry="3" />
+          <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+        </svg>
+        <span class="text-[10px]">Sources</span>
+      </button>
+      <button onclick="showScreen('stats')" class="nav-item flex flex-col items-center gap-0.5 px-3 py-1 text-muted"
+        data-screen="stats">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <line x1="18" y1="20" x2="18" y2="10" />
+          <line x1="12" y1="20" x2="12" y2="4" />
+          <line x1="6" y1="20" x2="6" y2="14" />
+        </svg>
+        <span class="text-[10px]">Stats</span>
+      </button>
+    </div>
+  </nav>
+
+  <script>
+    function showScreen(name) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-' + name).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(n => {
+        n.classList.remove('active');
+        n.classList.add('text-muted');
+      });
+      const navBtn = document.querySelector(`[data-screen="${name}"]`);
+      if (navBtn) {
+        navBtn.classList.add('active');
+        navBtn.classList.remove('text-muted');
+      }
+      window.scrollTo(0, 0);
+    }
+
+    function toggleFilterPanel() {
+      document.getElementById('filter-panel').classList.toggle('open');
+    }
+  </script>
+
+</body>
+
+</html>
