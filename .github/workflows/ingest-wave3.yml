@@ -23,10 +23,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r ingestion/requirements.txt
 
-      - name: Run ingestion (Research papers)
+      - name: Run ingestion (Research papers + GitHub)
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
           UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
-        run: python -m ingestion.run --sources arxiv,semantic_scholar,papers_with_code,openreview,huggingface
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: python -m ingestion.run --sources arxiv,semantic_scholar,papers_with_code,openreview,huggingface,github

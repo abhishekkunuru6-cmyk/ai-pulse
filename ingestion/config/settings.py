@@ -13,6 +13,8 @@ REDDIT_CLIENT_SECRET: str = os.environ.get("REDDIT_CLIENT_SECRET", "")
 REDDIT_USER_AGENT: str = os.environ.get("REDDIT_USER_AGENT", "ai-pulse/1.0")
 UPSTASH_REDIS_URL: str = os.environ.get("UPSTASH_REDIS_REST_URL", "")
 UPSTASH_REDIS_TOKEN: str = os.environ.get("UPSTASH_REDIS_REST_TOKEN", "")
+GITHUB_PAT: str = os.environ.get("GH_TOKEN", "")
+
 
 # Pipeline settings
 DEDUP_FUZZY_THRESHOLD: int = 90
