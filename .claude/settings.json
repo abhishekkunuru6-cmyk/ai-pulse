@@ -1,5 +1,18 @@
 {
   "enabledPlugins": {
     "claude-mem@thedotmack": true
+  },
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "allow": [
+      "*.tsx",
+      "*.ts",
+      "*.md",
+      "*.py",
+      "*.js",
+      "*.sql"
+    ],
+    "deny": [],
+    "ask": []
   }
 }

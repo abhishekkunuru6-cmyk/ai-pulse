@@ -123,6 +123,7 @@ def _score_one(
         article.engagement_metrics,
         content_type=article.content_type,
         platform=article.platform,
+        published_at=article.published_at,
         reputable_authors=reputable_authors,
         topic_tags=list(article.topic_tags),
     )
@@ -156,10 +157,57 @@ def _freshness_multiplier(published_at: datetime | None) -> float:
     return 1.0
 
 
+def _citation_velocity_score(citations: int, published_at: datetime | None) -> float:
+    """Score papers by citation velocity (citations/day) rather than raw count.
+
+    Recent papers accumulating citations quickly rank much higher than old papers
+    with the same total count. Uses log-scale weekly velocity blended with
+    absolute-count for older papers.
+    """
+    if citations <= 0:
+        return 0.0
+
+    if published_at is None:
+        # No publish date: fall back to absolute-count tiers
+        if citations > 100:
+            return 2.5
+        if citations > 50:
+            return 2.0
+        if citations > 20:
+            return 1.5
+        if citations > 5:
+            return 1.0
+        return 0.5
+
+    now = datetime.now(timezone.utc)
+    pub = published_at if published_at.tzinfo else published_at.replace(tzinfo=timezone.utc)
+    days_since = max(1, (now - pub).days)
+
+    velocity = citations / days_since  # citations per day
+
+    # Log-scale weekly velocity maps naturally to 0-3.0:
+    #   0.14 cit/day  → ~0.87   (1 per week, 30-day paper with 4 cits)
+    #   0.5 cit/day   → ~1.3    (1 per 2 days)
+    #   1 cit/day     → ~1.5    (7/week)
+    #   5 cit/day     → ~2.3    (35/week — viral)
+    #   10 cit/day    → ~2.7
+    velocity_score = min(3.0, math.log2(1 + velocity * 7) / 2)
+
+    # Absolute-count bonus: rewards established papers with large corpora
+    abs_score = min(2.0, math.log2(1 + citations) / 5)
+
+    # Blend: fresh papers favour velocity; papers >1 year old favour absolute count
+    age_weight = min(1.0, days_since / 365)
+    blended = (1 - age_weight) * velocity_score + age_weight * max(velocity_score, abs_score)
+
+    return min(3.0, blended)
+
+
 def _normalize_engagement(
     metrics: dict[str, object],
     content_type: str = "",
     platform: str = "",
+    published_at: datetime | None = None,
     reputable_authors: frozenset[str] | None = None,
     topic_tags: list[str] | None = None,
 ) -> float:
@@ -204,19 +252,15 @@ def _normalize_engagement(
         elif primary > 5:
             score = 0.5
 
-    # --- Citation-based scoring for academic papers ---
-    if citations > 0 and score < 0.5:
-        if citations > 50:
-            score = 3.0
-        elif citations > 20:
-            score = 2.0
-        elif citations > 5:
-            score = 1.0
-        elif citations > 0:
-            score = 0.5
+    # --- Citation-based scoring for academic papers (velocity-aware) ---
+    citation_score = _citation_velocity_score(citations, published_at)
+    if citation_score > score:
+        score = citation_score
 
-    if influential > 3:
-        score = min(score + 0.5, 3.0)
+    # Influential citations are a quality signal independent of velocity
+    if influential > 0:
+        influential_boost = min(0.8, math.log2(1 + influential) * 0.3)
+        score = min(score + influential_boost, 3.0)
 
     # --- Comment boost (platform-calibrated) ---
     if platform == "hackernews":
@@ -245,7 +289,7 @@ def _normalize_engagement(
     # --- Dynamic paper scoring (when no citations/engagement) ---
     if content_type == "paper" and score < baseline + 0.1:
         score = max(score, baseline)
-        score = _dynamic_paper_score(score, metrics, topic_tags or [])
+        score = _dynamic_paper_score(score, metrics, topic_tags or [], published_at)
 
     # Apply baseline floor
     score = max(score, baseline)
@@ -267,6 +311,7 @@ def _dynamic_paper_score(
     base_score: float,
     metrics: dict[str, object],
     topic_tags: list[str],
+    published_at: datetime | None = None,
 ) -> float:
     """Differentiate papers that lack citation data using available signals.
 
@@ -275,6 +320,7 @@ def _dynamic_paper_score(
     - Topic tags matching hot AI topics (agents, LLMs, etc.)
     - Author count as proxy for collaboration breadth
     - HuggingFace upvotes (for cross-listed papers)
+    - Recency: very new papers get a small freshness credit
     """
     boost = 0.0
 
@@ -305,6 +351,18 @@ def _dynamic_paper_score(
     upvotes = _safe_int(metrics.get("upvotes"))
     if upvotes > 0:
         boost += min(0.3, 0.15 * math.log2(upvotes + 1))
+
+    # Signal 5: Recency credit for very new papers with no citation data yet.
+    # Papers in the first 14 days get a small boost since Semantic Scholar
+    # citation counts lag by several days after publication.
+    if published_at is not None:
+        now = datetime.now(timezone.utc)
+        pub = published_at if published_at.tzinfo else published_at.replace(tzinfo=timezone.utc)
+        days_since = max(0, (now - pub).days)
+        if days_since <= 3:
+            boost += 0.25  # Very fresh — not enough time to gather citations
+        elif days_since <= 14:
+            boost += 0.15  # Still early
 
     return min(base_score + boost, 3.0)
 

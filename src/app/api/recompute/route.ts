@@ -35,7 +35,8 @@ function computeScore(
   const citations = Number(metrics.citations ?? 0);
   const comments = Number(metrics.comments ?? 0);
   const rawEngagement = stars + points + upvotes + citations * 5 + comments * 0.5;
-  const viralityScore = rawEngagement > 0 ? Math.min(100, (Math.log10(rawEngagement) / 3) * 100) : 0;
+  const viralityScore =
+    rawEngagement > 0 ? Math.min(100, (Math.log10(rawEngagement) / 3) * 100) : 0;
 
   // Recency: exponential decay over 30 days
   const publishedAt = article.published_at ? new Date(article.published_at).getTime() : 0;
@@ -48,8 +49,15 @@ function computeScore(
     article.platform === "arxiv" ||
     article.platform === "semantic_scholar";
   const researchBase = isResearch ? 70 : 20;
-  const citationBoost = citations > 0 ? Math.min(30, Math.log10(citations) * 15) : 0;
-  const researchScore = Math.min(100, researchBase + citationBoost);
+
+  // Citation velocity: citations per day since publishing (dynamic scoring)
+  const daysSince =
+    publishedAt > 0 ? Math.max(1, (now - publishedAt) / (1000 * 60 * 60 * 24)) : 365;
+  const velocity = citations / daysSince;
+  const weeklyVelocity = velocity * 7;
+  // log2 scale: 0 vel→0, 1/wk→0.5, 7/wk→1.5, 35/wk→2.6 — maps to 0-30 boost
+  const velocityBoost = citations > 0 ? Math.min(30, (Math.log2(1 + weeklyVelocity) / 2) * 10) : 0;
+  const researchScore = Math.min(100, researchBase + velocityBoost);
 
   // Weighted combination (weights are 0-100, normalize to fractions)
   const totalWeight = weights.virality + weights.recency + weights.researchInterest;

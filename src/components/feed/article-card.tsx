@@ -39,9 +39,24 @@ function getPlatformEngagement(article: Article): string | null {
     const upvotes = Number(metrics?.upvotes ?? 0);
     if (upvotes > 0) return `${formatCompactNumber(upvotes)} upvotes`;
   }
-  if (article.platform === "arxiv") {
+  if (
+    article.content_type === "paper" ||
+    article.platform === "arxiv" ||
+    article.platform === "semantic_scholar"
+  ) {
     const citations = Number(metrics?.citations ?? 0);
-    if (citations > 0) return `${formatCompactNumber(citations)} citations`;
+    if (citations > 0) {
+      const publishedAt = article.published_at ? new Date(article.published_at).getTime() : 0;
+      const daysSince =
+        publishedAt > 0 ? Math.max(1, (Date.now() - publishedAt) / (1000 * 60 * 60 * 24)) : 0;
+      const weeklyVelocity = daysSince > 0 ? (citations / daysSince) * 7 : 0;
+      if (weeklyVelocity >= 1) {
+        const velocityStr =
+          weeklyVelocity >= 10 ? Math.round(weeklyVelocity).toString() : weeklyVelocity.toFixed(1);
+        return `${formatCompactNumber(citations)} cit · ${velocityStr}/wk`;
+      }
+      return `${formatCompactNumber(citations)} citations`;
+    }
     const influential = Number(metrics?.influential_citations ?? 0);
     if (influential > 0) return `${formatCompactNumber(influential)} influential`;
   }
