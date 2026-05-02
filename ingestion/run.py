@@ -45,6 +45,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger("ingestion")
 
+_github_fetcher = GitHubTrendingFetcher()
+
 FETCHER_MAP: dict[str, BaseFetcher] = {
     "hackernews": HackerNewsFetcher(),
     "reddit": RedditFetcher(),
@@ -54,7 +56,8 @@ FETCHER_MAP: dict[str, BaseFetcher] = {
     "papers_with_code": PapersWithCodeFetcher(),
     "openreview": OpenReviewFetcher(),
     "huggingface": HuggingFaceFetcher(),
-    "github_trending": GitHubTrendingFetcher(),
+    "github_trending": _github_fetcher,
+    "github": _github_fetcher,  # alias: workflow passes --sources github
 }
 
 # Which platform values map to which fetcher
@@ -72,6 +75,37 @@ PLATFORM_TO_FETCHER: dict[str, str] = {
     "huggingface": "huggingface",
     "github": "github_trending",
 }
+
+
+_GITHUB_MAX_FRACTION = 0.30  # GitHub articles capped at 30% of total for diversity
+
+
+def _enforce_github_cap(articles: list[NormalizedArticle]) -> list[NormalizedArticle]:
+    """Cap GitHub articles to 30% of the total batch to maintain feed diversity.
+
+    Keeps the highest-scoring GitHub articles up to the cap; all non-GitHub
+    articles are kept unchanged.
+    """
+    if not articles:
+        return articles
+
+    github = [a for a in articles if a.platform == "github"]
+    others = [a for a in articles if a.platform != "github"]
+
+    max_github = max(1, int(len(articles) * _GITHUB_MAX_FRACTION))
+    if len(github) <= max_github:
+        return articles
+
+    github_sorted = sorted(github, key=lambda a: a.engagement_score, reverse=True)
+    kept = github_sorted[:max_github]
+    logger.info(
+        "GitHub diversity cap applied: keeping %d/%d GitHub articles (%.0f%% of %d total)",
+        max_github,
+        len(github),
+        _GITHUB_MAX_FRACTION * 100,
+        len(articles),
+    )
+    return others + kept
 
 
 class PipelineConfigError(RuntimeError):
@@ -158,6 +192,9 @@ async def run_pipeline(source_types: list[str]) -> dict[str, int]:
 
     # Score
     scored = score_articles(tagged, sources_map, reputable_authors=reputable_authors)
+
+    # Enforce GitHub diversity cap (max 30% of total)
+    scored = _enforce_github_cap(scored)
 
     # Store in batches
     stored_count = 0
