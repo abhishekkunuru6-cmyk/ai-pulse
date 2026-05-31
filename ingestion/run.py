@@ -16,6 +16,7 @@ from datetime import datetime, timedelta, timezone
 from supabase import create_client
 
 from ingestion.config.settings import (
+    ARTICLE_RETENTION_DAYS,
     BATCH_UPSERT_SIZE,
     MAX_ARTICLES_PER_SOURCE,
     SUPABASE_KEY,
@@ -211,13 +212,42 @@ async def run_pipeline(source_types: list[str]) -> dict[str, int]:
     for source in sources_to_fetch:
         supabase.table("sources").update({"last_fetched": now}).eq("id", source.id).execute()
 
+    # Clean up old non-saved articles to stay within Supabase free-tier row limits.
+    # Saved articles (is_saved=True) are NEVER deleted.
+    stats["cleaned"] = _cleanup_old_articles(supabase)
+
     logger.info(
-        "Pipeline complete: fetched=%d, deduplicated=%d, stored=%d",
+        "Pipeline complete: fetched=%d, deduplicated=%d, stored=%d, cleaned=%d",
         stats["fetched"],
         stats["deduplicated"],
         stats["stored"],
+        stats["cleaned"],
     )
     return stats
+
+
+def _cleanup_old_articles(supabase) -> int:  # type: ignore[type-arg]
+    """Delete non-saved articles older than ARTICLE_RETENTION_DAYS.
+
+    Saved articles (is_saved=True) are never touched regardless of age.
+    Returns the number of rows deleted.
+    """
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=ARTICLE_RETENTION_DAYS)).isoformat()
+    result = (
+        supabase.table("articles")
+        .delete()
+        .eq("is_saved", False)
+        .lt("published_at", cutoff)
+        .execute()
+    )
+    deleted = len(result.data) if result.data else 0
+    if deleted:
+        logger.info(
+            "Cleanup: deleted %d non-saved articles older than %d days",
+            deleted,
+            ARTICLE_RETENTION_DAYS,
+        )
+    return deleted
 
 
 def _filter_sources(sources: list[Source], source_types: list[str]) -> list[Source]:
