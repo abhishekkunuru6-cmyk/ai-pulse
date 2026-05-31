@@ -6,8 +6,7 @@ const { mockFrom, mockResult } = vi.hoisted(() => {
   const handler: ProxyHandler<object> = {
     get(_target, prop) {
       if (prop === "then") {
-        return (resolve: (v: unknown) => void) =>
-          Promise.resolve(resolvedResult).then(resolve);
+        return (resolve: (v: unknown) => void) => Promise.resolve(resolvedResult).then(resolve);
       }
       return vi.fn().mockReturnValue(new Proxy({}, handler));
     },
@@ -23,6 +22,14 @@ const { mockFrom, mockResult } = vi.hoisted(() => {
 
 vi.mock("@/lib/supabase/client", () => ({
   supabase: { from: mockFrom },
+}));
+
+vi.mock("@/lib/utils/dedup-feed", () => ({
+  deduplicateFeed: (articles: unknown[]) => articles,
+}));
+
+vi.mock("@/lib/utils/diversify-feed", () => ({
+  diversifyByPlatform: (articles: unknown[], limit: number) => articles.slice(0, limit),
 }));
 
 import { getArticles, getArticleById, markArticleRead, getDigestArticles } from "./articles";
@@ -115,7 +122,10 @@ describe("articles repository", () => {
     });
 
     it("fetches weekly digest", async () => {
-      const articles = Array.from({ length: 10 }, (_, i) => ({ id: `${i}`, title: `Article ${i}` }));
+      const articles = Array.from({ length: 10 }, (_, i) => ({
+        id: `${i}`,
+        title: `Article ${i}`,
+      }));
       mockResult({ data: articles, error: null });
 
       const result = await getDigestArticles("weekly", 10);
