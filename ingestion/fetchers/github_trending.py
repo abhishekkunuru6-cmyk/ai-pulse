@@ -1,19 +1,20 @@
-"""GitHub Trending fetcher using the GitHub REST API search endpoint (no auth required).
+"""GitHub Trending fetcher using the GitHub REST API search endpoint.
 
-Uses the public search/repositories endpoint which allows 10 requests/minute
-without authentication. Queries multiple AI/ML keywords and scores results
-by stars, forks, and recency.
+Authenticates with GH_TOKEN when available (5000 req/hr).
+Falls back to unauthenticated (10 req/min) with inter-request delays.
+Queries multiple AI/ML keywords and scores results by stars, forks, and recency.
 """
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import math
 from datetime import datetime, timedelta, timezone
 
 import httpx
 
-from ingestion.config.settings import MAX_ARTICLES_PER_FETCH
+from ingestion.config.settings import GITHUB_PAT, MAX_ARTICLES_PER_FETCH
 from ingestion.fetchers.base import BaseFetcher
 from ingestion.models import RawArticle, Source
 
@@ -122,15 +123,24 @@ class GitHubTrendingFetcher(BaseFetcher):
 
         articles: list[RawArticle] = []
 
-        async with httpx.AsyncClient(
-            timeout=30,
-            headers={"Accept": "application/vnd.github+json"},
-        ) as client:
+        headers: dict[str, str] = {"Accept": "application/vnd.github+json"}
+        if GITHUB_PAT:
+            headers["Authorization"] = f"Bearer {GITHUB_PAT}"
+        else:
+            logger.warning("GH_TOKEN not set — using unauthenticated GitHub API (10 req/min)")
+
+        # Unauthenticated requests are capped at 10/min; add a delay between queries
+        # when running without auth to stay within the limit.
+        inter_request_delay = 0.0 if GITHUB_PAT else 7.0
+
+        async with httpx.AsyncClient(timeout=30, headers=headers) as client:
             queries = AI_SEARCH_QUERIES[:_MAX_QUERIES_PER_FETCH]
 
-            for query in queries:
-                params = _build_search_params(query, pushed_after)
+            for i, query in enumerate(queries):
+                if i > 0 and inter_request_delay:
+                    await asyncio.sleep(inter_request_delay)
 
+                params = _build_search_params(query, pushed_after)
                 response = await client.get(GITHUB_SEARCH_URL, params=params)
                 response.raise_for_status()
                 data = response.json()

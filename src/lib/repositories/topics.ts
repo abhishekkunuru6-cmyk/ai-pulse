@@ -336,6 +336,7 @@ const CTYPE_DISPLAY_NAMES: Record<string, string> = {
   "ctype-blogs": "Blog Highlights",
   "ctype-newsletters": "Newsletter Roundup",
   "ctype-videos": "Video Highlights",
+  "ctype-code": "Trending GitHub Repos",
 };
 
 /**
@@ -551,8 +552,8 @@ function clusterArticles(articles: readonly Article[]): Map<string, Article[]> {
   }
 
   // Step 3: Create content-type clusters for types that are underrepresented
-  // in keyword clusters. Blogs, papers, and newsletters have diverse titles
-  // that don't share bigrams, so keyword clustering misses them.
+  // in keyword clusters. Blogs, papers, newsletters, and code repos have diverse
+  // titles that don't share bigrams, so keyword clustering misses them.
   const CONTENT_TYPE_CLUSTER_CONFIG: ReadonlyArray<{
     readonly type: ContentType;
     readonly slug: string;
@@ -563,6 +564,7 @@ function clusterArticles(articles: readonly Article[]): Map<string, Article[]> {
     { type: "blog", slug: "ctype-blogs", minSize: 3, maxSize: 10 },
     { type: "newsletter", slug: "ctype-newsletters", minSize: 2, maxSize: 8 },
     { type: "video", slug: "ctype-videos", minSize: 2, maxSize: 8 },
+    { type: "code", slug: "ctype-code", minSize: 2, maxSize: 10 },
   ];
 
   for (const { type, slug, minSize, maxSize } of CONTENT_TYPE_CLUSTER_CONFIG) {
@@ -787,10 +789,10 @@ export async function getTopicClusters(
 
   if (mainError) throw new Error(`Failed to fetch articles for clustering: ${mainError.message}`);
 
-  // Supplemental fetches: ensure blogs, newsletters, and videos are represented.
+  // Supplemental fetches: ensure blogs, newsletters, videos, and code repos are represented.
   // These content types have lower engagement scores and get cut off by the main
-  // query's 1000-row Supabase default limit.
-  const supplementTypes: readonly ContentType[] = ["blog", "newsletter", "video"];
+  // query's engagement-sorted limit.
+  const supplementTypes: readonly ContentType[] = ["blog", "newsletter", "video", "code"];
   const mainIds = new Set((mainData ?? []).map((a: Article) => a.id));
 
   const supplements = await Promise.all(
@@ -816,8 +818,9 @@ export async function getTopicClusters(
   const rawArticles = [...((mainData ?? []) as Article[]), ...supplements.flat()];
   if (rawArticles.length === 0) return [];
 
-  // Diversify the input pool so clustering isn't dominated by HN/Reddit
-  const articles = diversifyByPlatform(rawArticles, 500, 0.25) as Article[];
+  // Diversify the input pool so clustering isn't dominated by HN/Reddit.
+  // 30% cap: any single platform (including github) can contribute at most 30% of the pool.
+  const articles = diversifyByPlatform(rawArticles, 500, 0.3) as Article[];
   const clusterMap = clusterArticles(articles);
 
   // When the user requests more topics (e.g. 50), allow single-article clusters
