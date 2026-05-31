@@ -16,7 +16,8 @@ from datetime import datetime, timedelta, timezone
 from supabase import create_client
 
 from ingestion.config.settings import (
-    ARTICLE_RETENTION_DAYS,
+    ARTICLE_CLEANUP_THRESHOLD,
+    ARTICLE_TARGET_ROWS,
     BATCH_UPSERT_SIZE,
     MAX_ARTICLES_PER_SOURCE,
     SUPABASE_KEY,
@@ -227,25 +228,63 @@ async def run_pipeline(source_types: list[str]) -> dict[str, int]:
 
 
 def _cleanup_old_articles(supabase) -> int:  # type: ignore[type-arg]
-    """Delete non-saved articles older than ARTICLE_RETENTION_DAYS.
+    """Delete oldest non-saved articles only when approaching the row limit.
 
-    Saved articles (is_saved=True) are never touched regardless of age.
+    Strategy:
+    - Count all articles. If below ARTICLE_CLEANUP_THRESHOLD, do nothing —
+      history is preserved as long as there is space.
+    - If at or above the threshold, delete the oldest non-saved articles
+      until the count drops to ARTICLE_TARGET_ROWS.
+    - Saved articles (is_saved=True) are NEVER deleted regardless of age.
+
     Returns the number of rows deleted.
     """
-    cutoff = (datetime.now(timezone.utc) - timedelta(days=ARTICLE_RETENTION_DAYS)).isoformat()
+    count_result = (
+        supabase.table("articles")
+        .select("id", count="exact")
+        .execute()
+    )
+    total = count_result.count or 0
+    logger.info("Article row count: %d / %d threshold", total, ARTICLE_CLEANUP_THRESHOLD)
+
+    if total < ARTICLE_CLEANUP_THRESHOLD:
+        return 0
+
+    # Find the published_at cutoff that covers the oldest (total - ARTICLE_TARGET_ROWS) rows
+    rows_to_delete = total - ARTICLE_TARGET_ROWS
+    if rows_to_delete <= 0:
+        return 0
+
+    # Fetch the oldest non-saved articles to find the cutoff date
+    oldest_result = (
+        supabase.table("articles")
+        .select("published_at")
+        .eq("is_saved", False)
+        .order("published_at", desc=False)
+        .limit(rows_to_delete)
+        .execute()
+    )
+    if not oldest_result.data:
+        return 0
+
+    cutoff_date = oldest_result.data[-1]["published_at"]
+    if not cutoff_date:
+        return 0
+
     result = (
         supabase.table("articles")
         .delete()
         .eq("is_saved", False)
-        .lt("published_at", cutoff)
+        .lte("published_at", cutoff_date)
         .execute()
     )
     deleted = len(result.data) if result.data else 0
     if deleted:
         logger.info(
-            "Cleanup: deleted %d non-saved articles older than %d days",
+            "Cleanup: deleted %d non-saved articles (table was at %d rows, target %d)",
             deleted,
-            ARTICLE_RETENTION_DAYS,
+            total,
+            ARTICLE_TARGET_ROWS,
         )
     return deleted
 

@@ -22,6 +22,9 @@ RECENCY_DECAY_HALF_LIFE_HOURS: int = 48
 MAX_ARTICLES_PER_FETCH: int = 50
 MAX_ARTICLES_PER_SOURCE: int = int(os.environ.get("MAX_ARTICLES_PER_SOURCE", "30"))
 BATCH_UPSERT_SIZE: int = 50
-# Non-saved articles older than this many days are deleted on each pipeline run.
-# Saved articles (is_saved=True) are never deleted regardless of this setting.
-ARTICLE_RETENTION_DAYS: int = int(os.environ.get("ARTICLE_RETENTION_DAYS", "30"))
+# Cleanup triggers only when the article table reaches this many rows.
+# Below this number, nothing is deleted — full history is preserved.
+# Supabase free tier allows 50K rows; trigger at 45K to leave headroom.
+ARTICLE_CLEANUP_THRESHOLD: int = int(os.environ.get("ARTICLE_CLEANUP_THRESHOLD", "45000"))
+# When cleanup runs, delete oldest non-saved articles down to this row count.
+ARTICLE_TARGET_ROWS: int = int(os.environ.get("ARTICLE_TARGET_ROWS", "40000"))
