@@ -30,4 +30,5 @@ jobs:
           UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
           UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: python -m ingestion.run --sources arxiv,semantic_scholar,papers_with_code,openreview,huggingface,github
+          SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
+        run: python -m ingestion.run --sources arxiv,semantic_scholar,papers_with_code,openreview,huggingface,github,github_releases

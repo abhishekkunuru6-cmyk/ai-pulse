@@ -25,6 +25,7 @@ from ingestion.config.settings import (
 )
 from ingestion.fetchers import (
     ArXivFetcher,
+    GitHubReleasesFetcher,
     GitHubTrendingFetcher,
     HackerNewsFetcher,
     HuggingFaceFetcher,
@@ -60,6 +61,7 @@ FETCHER_MAP: dict[str, BaseFetcher] = {
     "huggingface": HuggingFaceFetcher(),
     "github_trending": _github_fetcher,
     "github": _github_fetcher,  # alias: workflow passes --sources github
+    "github_releases": GitHubReleasesFetcher(),
 }
 
 # Which platform values map to which fetcher
@@ -76,6 +78,7 @@ PLATFORM_TO_FETCHER: dict[str, str] = {
     "openreview": "openreview",
     "huggingface": "huggingface",
     "github": "github_trending",
+    "github_releases": "github_releases",
 }
 
 

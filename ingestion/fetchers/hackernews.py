@@ -10,7 +10,7 @@ from ingestion.config.settings import MAX_ARTICLES_PER_FETCH
 from ingestion.fetchers.base import BaseFetcher
 from ingestion.models import RawArticle, Source
 
-HN_ALGOLIA_URL = "https://hn.algolia.com/api/v1/search"
+HN_ALGOLIA_URL = "https://hn.algolia.com/api/v1/search_by_date"
 AI_KEYWORDS = [
     "AI",
     "artificial intelligence",

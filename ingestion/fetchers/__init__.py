@@ -2,6 +2,7 @@
 
 from ingestion.fetchers.arxiv import ArXivFetcher
 from ingestion.fetchers.base import BaseFetcher
+from ingestion.fetchers.github_releases import GitHubReleasesFetcher
 from ingestion.fetchers.github_trending import GitHubTrendingFetcher
 from ingestion.fetchers.hackernews import HackerNewsFetcher
 from ingestion.fetchers.huggingface import HuggingFaceFetcher
@@ -14,6 +15,7 @@ from ingestion.fetchers.semantic_scholar import SemanticScholarFetcher
 __all__ = [
     "ArXivFetcher",
     "BaseFetcher",
+    "GitHubReleasesFetcher",
     "GitHubTrendingFetcher",
     "HackerNewsFetcher",
     "HuggingFaceFetcher",

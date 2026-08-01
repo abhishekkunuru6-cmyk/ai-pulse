@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 
 import httpx
 
-from ingestion.config.settings import MAX_ARTICLES_PER_FETCH
+from ingestion.config.settings import MAX_ARTICLES_PER_FETCH, SEMANTIC_SCHOLAR_API_KEY
 from ingestion.fetchers.base import BaseFetcher, logger
 from ingestion.models import RawArticle, Source
 
@@ -58,6 +58,7 @@ async def _search_papers(
     client: httpx.AsyncClient, query: str
 ) -> list[RawArticle]:
     """Search for papers matching a query, sorted by recency."""
+    headers = {"x-api-key": SEMANTIC_SCHOLAR_API_KEY} if SEMANTIC_SCHOLAR_API_KEY else {}
     try:
         response = await client.get(
             S2_API_URL,
@@ -68,6 +69,7 @@ async def _search_papers(
                 "sort": "publicationDate:desc",
                 "year": f"{datetime.now(timezone.utc).year}",
             },
+            headers=headers,
         )
         # S2 API returns 429 on rate limit — handle gracefully
         if response.status_code == 429:
